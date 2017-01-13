@@ -21,6 +21,7 @@
 
 #import "AFURLSessionManager.h"
 #import <objc/runtime.h>
+#import <GD/GDURLLoadingSystem.h>
 
 #if (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && __IPHONE_OS_VERSION_MAX_ALLOWED >= 70000) || (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && __MAC_OS_X_VERSION_MAX_ALLOWED >= 1090)
 
@@ -857,7 +858,14 @@ static NSString * const AFNSURLSessionTaskDidSuspendNotification = @"com.alamofi
 }
 
 - (BOOL)respondsToSelector:(SEL)selector {
-    if (selector == @selector(URLSession:task:willPerformHTTPRedirection:newRequest:completionHandler:)) {
+    if ((selector == @selector(URLSession:didReceiveChallenge:completionHandler:))
+        && [GDURLLoadingSystem isSecureCommunicationEnabled]) {
+        return NO;
+    }
+    if ((selector == @selector(URLSession:task:didReceiveChallenge:completionHandler:))
+        && [GDURLLoadingSystem isSecureCommunicationEnabled]) {
+        return NO;
+    } else if (selector == @selector(URLSession:task:willPerformHTTPRedirection:newRequest:completionHandler:)) {
         return self.taskWillPerformHTTPRedirection != nil;
     } else if (selector == @selector(URLSession:dataTask:didReceiveResponse:completionHandler:)) {
         return self.dataTaskDidReceiveResponse != nil;
